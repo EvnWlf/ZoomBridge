@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <AssemblyName>ZoomBridge</AssemblyName>
+    <RootNamespace>ZoomBridge</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\ZoomBridge.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
+    <Product>ZoomBridge</Product>
+    <Description>Agente local para respaldar grabaciones de Zoom</Description>
+    <!-- La API ThemeMode de WPF Fluent está marcada como experimental -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+
+    <!-- Huella de memoria reducida para un agente residente en la bandeja -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+    <UseSystemResourceKeys>false</UseSystemResourceKeys>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ZoomBridge.Tests\**" />
+    <EmbeddedResource Remove="ZoomBridge.Tests\**" />
+    <None Remove="ZoomBridge.Tests\**" />
+    <Page Remove="ZoomBridge.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\ZoomBridge.ico" />
+    <Resource Include="Assets\ZoomBridge.png" />
+    <None Include="Assets\ZoomBridge.ico" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Assets\ZoomBridge.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ZoomBridge.Tests" />
+  </ItemGroup>
+
+  <!-- Generación automática del paquete de instalación (.exe) al publicar -->
+  <Target Name="BuildInnoSetupInstaller" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <InnoExe Condition="Exists('$(LocalAppData)\Programs\Inno Setup 6\ISCC.exe')">$(LocalAppData)\Programs\Inno Setup 6\ISCC.exe</InnoExe>
+      <InnoExe Condition="'$(InnoExe)' == '' and Exists('C:\Program Files (x86)\Inno Setup 6\ISCC.exe')">C:\Program Files (x86)\Inno Setup 6\ISCC.exe</InnoExe>
+      <InnoExe Condition="'$(InnoExe)' == '' and Exists('C:\Program Files\Inno Setup 6\ISCC.exe')">C:\Program Files\Inno Setup 6\ISCC.exe</InnoExe>
+    </PropertyGroup>
+    <Message Importance="high" Text="[ZoomBridge] Generando paquete instalador con Inno Setup..." Condition="'$(InnoExe)' != ''" />
+    <Exec Command="&quot;$(InnoExe)&quot; &quot;$(MSBuildProjectDirectory)\installer\zoombridge-setup.iss&quot;" Condition="'$(InnoExe)' != ''" />
+    <Message Importance="high" Text="[ZoomBridge] Paquete instalador generado exitosamente en publish\installer\." Condition="'$(InnoExe)' != ''" />
+  </Target>
+
+</Project>

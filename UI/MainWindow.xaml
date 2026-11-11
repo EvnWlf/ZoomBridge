@@ -1,0 +1,551 @@
+<Window x:Class="ZoomBridge.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ZoomBridge" 
+        Height="640" Width="960"
+        MinHeight="540" MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="Auto"
+        FontFamily="Segoe UI Variable Text, Segoe UI">
+
+    <Window.Resources>
+        <!-- Estilo de Pestaña de Navegación Lateral (Sin círculos de RadioButton) -->
+        <Style x:Key="NavTabItemStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="MinHeight" Value="42"/>
+            <Setter Property="Margin" Value="0,2,0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="TabBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- Barra indicadora vertical de selección -->
+                                <Border x:Name="Indicator" Grid.Column="0" Width="3" Height="16" CornerRadius="1.5"
+                                        Background="{DynamicResource AccentTextFillColorPrimaryBrush}" Visibility="Collapsed" Margin="-4,0,0,0"/>
+                                <!-- Icono Fluent -->
+                                <TextBlock Grid.Column="1" Text="{TemplateBinding Tag}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" 
+                                           FontSize="15" Margin="8,0,10,0" VerticalAlignment="Center"/>
+                                <!-- Texto de la Pestaña -->
+                                <ContentPresenter Grid.Column="2" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="TabBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}"/>
+                                <Setter TargetName="Indicator" Property="Visibility" Value="Visible"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Barra lateral de navegación estilo Windows 11 -->
+        <Border Grid.Column="0" 
+                Background="{DynamicResource LayerFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
+                BorderThickness="0,0,1,0"
+                Padding="10,16">
+            <DockPanel>
+                <!-- Encabezado de la App con Icono nítido de alta resolución -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="8,4,0,24">
+                    <Image x:Name="ImgMainAppIcon" Width="26" Height="26" Margin="0,0,10,0" VerticalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           UseLayoutRounding="True" SnapsToDevicePixels="True"/>
+                    <TextBlock Text="ZoomBridge" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                </StackPanel>
+
+                <!-- Menú de pestañas limpias sin radios -->
+                <StackPanel DockPanel.Dock="Top">
+                    <RadioButton x:Name="NavDashboard" Content="Estado" Tag="&#xE80F;"
+                                 Style="{StaticResource NavTabItemStyle}" IsChecked="True" Checked="Nav_Checked"/>
+                    <RadioButton x:Name="NavRecordings" Content="Grabaciones" Tag="&#xE8B7;"
+                                 Style="{StaticResource NavTabItemStyle}" Checked="Nav_Checked"/>
+                    <RadioButton x:Name="NavSettings" Content="Configuración" Tag="&#xE713;"
+                                 Style="{StaticResource NavTabItemStyle}" Checked="Nav_Checked"/>
+                </StackPanel>
+
+                <!-- Acceso al repositorio Open Source en GitHub -->
+                <Border DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Padding="4,8,4,0">
+                    <Button x:Name="BtnSidebarGitHub" Padding="10,6" MinHeight="34" HorizontalAlignment="Stretch" Cursor="Hand" Click="BtnOpenGitHubRepo_Click"
+                            ToolTip="https://github.com/DiosaAqua/ZoomBridge">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE774;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                            <TextBlock Text="Repositorio GitHub" FontSize="11" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                        </StackPanel>
+                    </Button>
+                </Border>
+            </DockPanel>
+        </Border>
+
+        <!-- Área de Contenido Principal -->
+        <Grid Grid.Column="1" Margin="28,24">
+
+            <!-- VISTA 1: ESTADO (Dashboard) -->
+            <Grid x:Name="ViewDashboard" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Encabezado -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,18">
+                    <TextBlock x:Name="TxtDashboardTitle" Text="Estado del Agente" FontSize="24" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                    <TextBlock x:Name="TxtDashboardSubtitle" Text="Supervisión automática de grabaciones de Zoom" FontSize="13" Margin="0,3,0,0"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+
+                <!-- Banner dinámico de notificación de escaneo (Sin popups bloqueantes) -->
+                <Border Grid.Row="1" x:Name="BannerScanNotification" Visibility="Collapsed"
+                        Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                        <TextBlock Grid.Column="1" x:Name="TxtScanBannerMessage" Text="Buscando grabaciones pendientes..." FontSize="13" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                        <Button Grid.Column="2" Content="&#xE711;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="11" Padding="6,2" MinHeight="26" Cursor="Hand" Click="BtnCloseScanBanner_Click"/>
+                    </Grid>
+                </Border>
+
+                <!-- Tarjetas KPI -->
+                <Grid Grid.Row="2" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                        <StackPanel>
+                            <TextBlock x:Name="LblKpiCount" Text="Reuniones respaldadas" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock x:Name="KpiCount" Text="0" FontSize="26" FontWeight="SemiBold" Margin="0,6,0,0"
+                                       Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="4,0,4,0">
+                        <StackPanel>
+                            <TextBlock x:Name="LblKpiSize" Text="Espacio transferido" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock x:Name="KpiSize" Text="0 B" FontSize="26" FontWeight="SemiBold" Margin="0,6,0,0"
+                                       Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="8,0,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="LblKpiLastTime" Text="Último respaldo" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock x:Name="KpiLastTime" Text="Nunca" FontSize="15" FontWeight="SemiBold" Margin="0,10,0,0"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Tarjeta de Control y Actividad de Grabaciones Detectadas -->
+                <Border Grid.Row="3" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="18">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Indicador en vivo -->
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Ellipse x:Name="DashboardStatusDot" Grid.Column="0" Width="10" Height="10" Fill="#10B981" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="DashboardStatusTitle" Text="Monitoreando" FontWeight="SemiBold" FontSize="14"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock x:Name="DashboardStatusSubtitle" Text="Esperando nuevas reuniones" FontSize="12"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <ProgressBar Grid.Row="1" x:Name="DashboardProgressBar" Height="4" Margin="0,0,0,14" Visibility="Collapsed"/>
+
+                        <!-- Botones de Acción -->
+                        <WrapPanel Grid.Row="2" Margin="0,0,0,16">
+                            <Button x:Name="BtnScanNow" Style="{DynamicResource AccentButtonStyle}" MinHeight="38" Padding="16,8" Margin="0,0,10,10" Cursor="Hand" Click="BtnScanNow_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtBtnScanNow" Text="Escanear grabaciones ahora" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="BtnOpenZoomDir" MinHeight="38" Padding="14,8" Margin="0,0,10,10" Cursor="Hand" Click="BtnOpenZoomDir_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xED25;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtBtnOpenZoom" Text="Abrir carpeta de Zoom" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Button x:Name="BtnOpenDestDir" MinHeight="38" Padding="14,8" Margin="0,0,10,10" Cursor="Hand" Click="BtnOpenDestDir_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE753;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtBtnOpenDest" Text="Abrir carpeta de respaldo" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </WrapPanel>
+
+                        <!-- Sub-sección: Indicadores y Resumen de Estado de Todas las Grabaciones -->
+                        <Grid Grid.Row="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" x:Name="TxtRecentActivityHeader" Text="Actividad y grabaciones detectadas" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,8"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+                            <!-- Lista ligera de actividad con estado de cada una -->
+                            <ListView Grid.Row="1" x:Name="ListDashboardActivity" 
+                                      Background="Transparent" BorderThickness="0"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="6" Padding="10,8" Margin="0,2,0,2">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding StatusGlyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14" Margin="0,0,10,0" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="12" 
+                                                               TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding FolderName}"
+                                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                                    <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                </StackPanel>
+                                                <Border Grid.Column="2" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" CornerRadius="4" Padding="8,4" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- VISTA 2: GRABACIONES RESPALDADAS (Diseño fluido sin DataGrid apretado) -->
+            <Grid x:Name="ViewRecordings" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="TxtRecordingsTitle" Text="Grabaciones" FontSize="24" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                        <TextBlock x:Name="TxtRecordingsSubtitle" Text="Administra y vuelve a sincronizar las reuniones guardadas" FontSize="13" Margin="0,3,0,0"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" MinHeight="36" Padding="14,6" Cursor="Hand" Click="BtnRefreshRecordings_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE72C;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TxtBtnRefresh" Text="Actualizar" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Buscador Minimalista -->
+                <TextBox Grid.Row="1" x:Name="TxtSearchRecordings" MinHeight="36" Padding="12,6" Margin="0,0,0,14"
+                         TextChanged="TxtSearchRecordings_TextChanged"/>
+
+                <!-- Lista de Tarjetas Fluidas con Ruta Completa visible -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="ListRecordingsItems">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Información y Ruta Completa -->
+                                        <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                            <!-- Fila 1: Título acoplado y Chip de Estado fijado sin cortarse -->
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" MaxWidth="360"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding DisplayName}" FontSize="15" FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding FolderName}"
+                                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                                                <Border Grid.Column="1" Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="8,2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding StatusText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- Fila 2: Metadatos -->
+                                            <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8"/>
+
+                                            <!-- Fila 3: Ruta Completa Clara y Seleccionable -->
+                                            <Grid Background="{DynamicResource SubtleFillColorSecondaryBrush}" Margin="0,2,0,0">
+                                                <Border CornerRadius="4" Padding="8,4">
+                                                    <TextBox Text="{Binding DestinationFolderPath, Mode=OneWay}" IsReadOnly="True"
+                                                             BorderThickness="0" Background="Transparent" FontSize="12"
+                                                             Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                                </Border>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <!-- Botones Táctiles de Acción a la derecha -->
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <!-- Botón Sincronizar -->
+                                            <Button ToolTip="Volver a sincronizar esta grabación"
+                                                    MinHeight="36" Padding="10,6" Margin="3" Cursor="Hand" Click="BtnItemResync_Click">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="&#xE895;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                                                    <TextBlock Text="Sincronizar" FontSize="12" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
+
+                                            <!-- Abrir carpeta -->
+                                            <Button ToolTip="Abrir carpeta en el Explorador"
+                                                    MinHeight="36" Padding="10,6" Margin="3" Cursor="Hand" Click="BtnItemOpenFolder_Click">
+                                                <TextBlock Text="&#xED25;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"/>
+                                            </Button>
+
+                                            <!-- Ver Video -->
+                                            <Button ToolTip="Reproducir video"
+                                                    MinHeight="36" Padding="10,6" Margin="3" Cursor="Hand" Click="BtnItemPlay_Click">
+                                                <TextBlock Text="&#xE768;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"/>
+                                            </Button>
+
+                                            <!-- Renombrar -->
+                                            <Button ToolTip="Renombrar grabación"
+                                                    MinHeight="36" Padding="10,6" Margin="3" Cursor="Hand" Click="BtnItemRename_Click">
+                                                <TextBlock Text="&#xE70F;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14"/>
+                                            </Button>
+
+                                            <!-- Eliminar -->
+                                            <Button ToolTip="Quitar del historial"
+                                                    MinHeight="36" Padding="10,6" Margin="3" Cursor="Hand" Click="BtnItemDelete_Click">
+                                                <TextBlock Text="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="14" Foreground="#EF4444"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- VISTA 3: CONFIGURACIÓN MINIMALISTA (Estilo Windows 11) -->
+            <ScrollViewer x:Name="ViewSettings" Visibility="Collapsed" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,12,0">
+                    <TextBlock x:Name="TxtSettingsTitle" Text="Configuración" FontSize="24" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                    <TextBlock x:Name="TxtSettingsSubtitle" Text="Administra las rutas y opciones de ejecución" FontSize="13" Margin="0,3,0,20"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+                    <!-- Grupo 1: Almacenamiento -->
+                    <TextBlock x:Name="TxtStorageGroup" Text="Almacenamiento" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                        <StackPanel>
+                            <!-- Origen -->
+                            <TextBlock x:Name="TxtZoomFolderLabel" Text="Carpeta de grabaciones de Zoom (Origen)" FontWeight="SemiBold" FontSize="13"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                            <TextBlock x:Name="TxtZoomFolderDesc" Text="Ubicación local donde Zoom guarda los archivos de reunión" FontSize="12" Margin="0,2,0,8"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtSettingsZoomPath" MinHeight="36" Padding="10,6"/>
+                                <Button Grid.Column="1" x:Name="BtnBrowseZoom" Content="Examinar..." MinHeight="36" Padding="14,6" Margin="8,0,0,0" Cursor="Hand" Click="BtnSettingsBrowseZoom_Click"/>
+                            </Grid>
+
+                            <!-- Destino -->
+                            <TextBlock x:Name="TxtDestFolderLabel" Text="Carpeta de respaldo (Destino)" FontWeight="SemiBold" FontSize="13"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                            <TextBlock x:Name="TxtDestFolderDesc" Text="Ruta sincronizada con SharePoint, OneDrive o almacenamiento local" FontSize="12" Margin="0,2,0,8"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="TxtSettingsDestPath" MinHeight="36" Padding="10,6"/>
+                                <Button Grid.Column="1" x:Name="BtnBrowseDest" Content="Examinar..." MinHeight="36" Padding="14,6" Margin="8,0,0,0" Cursor="Hand" Click="BtnSettingsBrowseDest_Click"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Grupo 2: Opciones de Automatización -->
+                    <TextBlock x:Name="TxtBehaviorGroup" Text="Comportamiento" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,16">
+                        <StackPanel>
+                            <CheckBox x:Name="ChkSettingsAutoStart" Content="Iniciar automáticamente con Windows" Margin="0,6"/>
+                            <CheckBox x:Name="ChkSettingsRenamePrompt" Content="Solicitar renombrar la reunión al finalizar la grabación" Margin="0,6"/>
+                            <CheckBox x:Name="ChkSettingsDeleteSource" Content="Eliminar de la carpeta de Zoom tras respaldar con éxito" Margin="0,6"/>
+                            <CheckBox x:Name="ChkSettingsNotifications" Content="Mostrar notificaciones en el sistema" Margin="0,6"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <TextBlock x:Name="TxtTimeoutLabel" Text="Tiempo de espera para renombrar:" VerticalAlignment="Center" Margin="0,0,8,0"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                <TextBox x:Name="TxtSettingsTimeout" Width="60" TextAlignment="Center" MinHeight="32" Padding="4"/>
+                                <TextBlock x:Name="TxtSecondsLabel" Text="segundos" VerticalAlignment="Center" Margin="8,0,0,0"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Grupo 3: Apariencia e Idioma (Cambio Instantáneo) -->
+                    <TextBlock x:Name="TxtAppearanceGroup" Text="Apariencia e Idioma" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,24">
+                        <StackPanel>
+                            <!-- Tema (Inmediato sin confirmar) -->
+                            <TextBlock x:Name="TxtThemeLabel" Text="Tema de la aplicación" FontWeight="SemiBold" FontSize="13"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                            <TextBlock x:Name="TxtThemeDesc" Text="Elige el aspecto visual de ZoomBridge (se aplica de inmediato)" FontSize="12" Margin="0,2,0,10"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <RadioButton x:Name="RadioThemeSystem" Content="Predeterminado del sistema" IsChecked="True" Margin="0,0,20,0" Cursor="Hand" Click="ThemeRadio_Click"/>
+                                <RadioButton x:Name="RadioThemeLight" Content="Claro" Margin="0,0,20,0" Cursor="Hand" Click="ThemeRadio_Click"/>
+                                <RadioButton x:Name="RadioThemeDark" Content="Oscuro" Cursor="Hand" Click="ThemeRadio_Click"/>
+                            </StackPanel>
+
+                            <Separator Background="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,4,0,14"/>
+
+                            <!-- Selector de Idioma (Español / English) -->
+                            <TextBlock x:Name="TxtLanguageLabel" Text="Idioma de la interfaz" FontWeight="SemiBold" FontSize="13"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                            <TextBlock x:Name="TxtLanguageDesc" Text="Selecciona el idioma principal de la aplicación" FontSize="12" Margin="0,2,0,10"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton x:Name="RadioLangEs" Content="Español" IsChecked="True" Margin="0,0,20,0" Cursor="Hand" Click="LanguageRadio_Click"/>
+                                <RadioButton x:Name="RadioLangEn" Content="English" Cursor="Hand" Click="LanguageRadio_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Grupo 4: Información y Repositorio Open Source -->
+                    <TextBlock Text="Información del Proyecto" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="18" Margin="0,0,0,24">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <TextBlock Text="ZoomBridge v1.0.0" FontWeight="SemiBold" FontSize="13"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                    <Border Background="{DynamicResource SubtleFillColorSecondaryBrush}" CornerRadius="4" Padding="6,2" Margin="10,0,0,0">
+                                        <TextBlock Text="Código Abierto (MIT)" FontSize="10" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Text="Desarrollado para respaldar grabaciones locales de Zoom automáticamente en tu nube." FontSize="12"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6"/>
+                                <TextBlock Text="Repositorio Oficial: https://github.com/DiosaAqua/ZoomBridge" FontSize="11"
+                                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Padding="12,6" MinHeight="34" Cursor="Hand" VerticalAlignment="Center" Click="BtnOpenGitHubRepo_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE774;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Ver en GitHub" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Botón Guardar Rutas/Comportamiento -->
+                    <Button Style="{DynamicResource AccentButtonStyle}" MinHeight="40" Padding="20,8" HorizontalAlignment="Right" Cursor="Hand" Click="BtnSaveSettings_Click">
+                        <TextBlock x:Name="TxtBtnSave" Text="Guardar cambios" FontWeight="SemiBold"/>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+
+        </Grid>
+    </Grid>
+</Window>

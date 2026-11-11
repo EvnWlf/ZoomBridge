@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ZoomBridge.csproj" />
+  <Project Path="ZoomBridge.Tests/ZoomBridge.Tests.csproj" />
+</Solution>

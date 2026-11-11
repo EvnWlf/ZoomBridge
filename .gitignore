@@ -1,0 +1,28 @@
+## Visual Studio & .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+.vscode/
+
+## Build & Publishing outputs
+publish/
+dist/
+
+## SQLite & Databases
+*.db
+*.db-shm
+*.db-wal
+
+## Logs & Temp files
+*.log
+*.tmp
+*.bak
+[Tt]emp/
+
+## Test results
+TestResults/
