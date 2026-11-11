@@ -3,8 +3,8 @@
 
 #define MyAppName "ZoomBridge"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "DiosaAqua"
-#define MyAppURL "https://github.com/DiosaAqua/ZoomBridge"
+#define MyAppPublisher "EvnWlf"
+#define MyAppURL "https://github.com/EvnWlf/ZoomBridge"
 #define MyAppExeName "ZoomBridge.exe"
 
 [Setup]

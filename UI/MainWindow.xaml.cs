@@ -526,7 +526,7 @@ namespace ZoomBridge.UI
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "https://github.com/DiosaAqua/ZoomBridge",
+                    FileName = "https://github.com/EvnWlf/ZoomBridge",
                     UseShellExecute = true
                 });
             }

@@ -1,6 +1,13 @@
 # ZoomBridge (Zsave) 📹☁️
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub-EvnWlf%2FZoomBridge-blue?logo=github)](https://github.com/EvnWlf/ZoomBridge)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D4?logo=windows)](https://github.com/EvnWlf/ZoomBridge)
+[![.NET](https://img.shields.io/badge/.NET-10.0%20WPF%20Fluent-512BD4?logo=dotnet)](https://github.com/EvnWlf/ZoomBridge)
+[![License](https://img.shields.io/badge/License-MIT-green)](https://github.com/EvnWlf/ZoomBridge)
+
 > **Agente de escritorio ligero, autónomo y de código abierto para automatizar el respaldo y sincronización de grabaciones locales de Zoom hacia SharePoint, OneDrive, Google Drive o almacenamiento local.**
+
+**Repositorio oficial:** [https://github.com/EvnWlf/ZoomBridge](https://github.com/EvnWlf/ZoomBridge)
 
 ---
 

@@ -95,7 +95,7 @@
                 <!-- Acceso al repositorio Open Source en GitHub -->
                 <Border DockPanel.Dock="Bottom" VerticalAlignment="Bottom" Padding="4,8,4,0">
                     <Button x:Name="BtnSidebarGitHub" Padding="10,6" MinHeight="34" HorizontalAlignment="Stretch" Cursor="Hand" Click="BtnOpenGitHubRepo_Click"
-                            ToolTip="https://github.com/DiosaAqua/ZoomBridge">
+                            ToolTip="https://github.com/EvnWlf/ZoomBridge">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="&#xE774;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"
                                        Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
@@ -527,7 +527,7 @@
                                 </StackPanel>
                                 <TextBlock Text="Desarrollado para respaldar grabaciones locales de Zoom automáticamente en tu nube." FontSize="12"
                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,6"/>
-                                <TextBlock Text="Repositorio Oficial: https://github.com/DiosaAqua/ZoomBridge" FontSize="11"
+                                <TextBlock Text="Repositorio Oficial: https://github.com/EvnWlf/ZoomBridge" FontSize="11"
                                            Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
                             </StackPanel>
                             <Button Grid.Column="1" Padding="12,6" MinHeight="34" Cursor="Hand" VerticalAlignment="Center" Click="BtnOpenGitHubRepo_Click">
